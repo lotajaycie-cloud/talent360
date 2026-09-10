@@ -346,9 +346,9 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
     };
   }
   function parseDcText(src) {
-    const openMatch = /<x-dc(?:\s[^>]*)?>/.exec(src);
+    const openMatch = new RegExp("<x-" + "dc(?:\\s[^>]*)?>").exec(src);
     if (!openMatch) return null;
-    const close = src.lastIndexOf("</x-dc>");
+    const close = src.lastIndexOf("</x-" + "dc>");
     if (close === -1 || close < openMatch.index) return null;
     const template = src.slice(openMatch.index + openMatch[0].length, close);
     const doc = new DOMParser().parseFromString(src, "text/html");
@@ -1958,6 +1958,16 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
       const pre = res ? res[url] : void 0;
       const target = typeof pre === "string" && pre ? pre : url;
       const blob = bundledBlob(target);
+      // PATCHED: this app is a single self-contained component, so there are no
+      // siblings to fetch. Left enabled, the request for "./<Name>.dc.html" is
+      // answered by the host with index.html itself (200, not 404). The runtime
+      // then finds this app's own component block inside that response, re-parses the
+      // app from itself and re-encodes its already-encoded JS - which rewrites
+      // identifiers via the camel-attribute encoder, throws a SyntaxError, and
+      // renders the mangled source on screen. It only shows up when served over
+      // http(s); on file:// the fetch fails and the bug stays hidden.
+      // Bundled components still resolve via bundledBlob; only the network path is cut.
+      if (!blob) return;
       (blob ? blob.text() : fetch(target).then((res2) => {
         if (!res2.ok) {
           console.error(
@@ -1977,7 +1987,7 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
           console.error(
             '[dc-runtime] sibling fetch for "' + name + '":',
             url,
-            "has no <x-dc> block \u2014 not a Design Component."
+            "has no <x-" + "dc> block \u2014 not a Design Component."
           );
           return;
         }

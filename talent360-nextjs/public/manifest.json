@@ -1,0 +1,13 @@
+{
+  "name": "Talent360",
+  "short_name": "Talent360",
+  "description": "Talent360 — Develop, Engage, Retain. Stronger talent, greater tomorrows.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F7F7F9",
+  "theme_color": "#7C1F3D",
+  "icons": [
+    { "src": "/logo.png", "sizes": "1254x1254", "type": "image/png", "purpose": "any" },
+    { "src": "/icon.png", "sizes": "32x32", "type": "image/png" }
+  ]
+}
